@@ -1,0 +1,3 @@
+/** Shared article typography for the public post page and the admin preview */
+export const PROSE_CLASS_NAME =
+  "prose max-w-none text-[1.0625rem] prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-tight prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-blockquote:rounded-r-xl prose-blockquote:bg-accent/50 prose-blockquote:py-1 prose-blockquote:font-normal prose-blockquote:not-italic prose-code:rounded-md prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-li:marker:text-primary";
