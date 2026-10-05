@@ -11,12 +11,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/features/seo/lib/metadata";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Մեր մասին",
-  description: "Ովքեր ենք մենք և ինչու ենք ստեղծել Parz Tech-ը։",
-};
+  description:
+    "Ովքեր ենք մենք և ինչու ենք ստեղծել Parz Tech-ը՝ հայալեզու բլոգ տեխնոլոգիաների և արհեստական բանականության մասին։",
+  path: "/about/",
+});
 
 const values = [
   {

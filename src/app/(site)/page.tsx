@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowRight, BookOpen, Languages, Layers } from "lucide-react";
 import Link from "next/link";
 
@@ -10,8 +11,18 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { categories } from "@/features/blog/config/categories";
 import { siteConfig } from "@/config/site";
+import { JsonLd } from "@/features/seo/components/JsonLd";
+import { pageMetadata } from "@/features/seo/lib/metadata";
+import { websiteSchema } from "@/features/seo/lib/schema";
 import { getPublishedPosts } from "@/features/blog/lib/queries";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = pageMetadata({
+  title: `${siteConfig.name} | ${siteConfig.tagline}`,
+  description: siteConfig.description,
+  path: "/",
+  absoluteTitle: true,
+});
 
 export default async function Home() {
   const posts = await getPublishedPosts();
@@ -29,6 +40,7 @@ export default async function Home() {
 
   return (
     <>
+      <JsonLd data={websiteSchema()} />
       {/* Hero */}
       <section className="relative isolate overflow-hidden border-b">
         <div className="absolute inset-0 -z-10 bg-grid mask-[radial-gradient(ellipse_at_top,black,transparent_70%)] opacity-70" />

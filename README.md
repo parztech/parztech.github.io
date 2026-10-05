@@ -70,5 +70,18 @@ Set these environment variables in Vercel: `TURSO_DATABASE_URL`,
 `TURSO_AUTH_TOKEN`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`,
 `ADMIN_GITHUB_LOGINS`. The build runs database migrations automatically.
 
+Optional: `GOOGLE_SITE_VERIFICATION` (Search Console HTML-tag code) and
+`NEXT_PUBLIC_SITE_URL` (only once there is a custom domain; otherwise Vercel's
+production URL is used).
+
+## SEO
+
+- `/sitemap.xml`, `/robots.txt` and `/rss.xml` are generated from published posts
+  and refreshed on publish.
+- Every page has a canonical URL, Open Graph/Twitter tags and a preview image
+  (`/og.png`, or `/blog/<slug>/og.png` for posts).
+- Structured data: `WebSite` + `Organization` (with alternate names from
+  `src/config/site.ts`) on the home page, `BlogPosting` + breadcrumbs on posts.
+
 Categories live in `src/features/blog/config/categories.ts`; site name and nav in
 `src/config/site.ts`.

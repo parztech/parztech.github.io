@@ -38,6 +38,8 @@ export type SaveResult =
 // Public pages are prerendered; refresh them all after any change (small blog)
 function refreshSite() {
   revalidatePath("/", "layout");
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/rss.xml");
 }
 
 export async function savePost(input: PostInput): Promise<SaveResult> {

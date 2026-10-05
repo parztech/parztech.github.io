@@ -3,13 +3,15 @@ import { Suspense } from "react";
 
 import { PostsExplorer } from "@/features/blog/components/PostsExplorer";
 import { EmptyPosts } from "@/features/blog/components/EmptyPosts";
+import { pageMetadata } from "@/features/seo/lib/metadata";
 import { getPublishedPosts } from "@/features/blog/lib/queries";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Բլոգ",
   description:
-    "Բոլոր հոդվածները տեխնոլոգիաների և արհեստական բանականության մասին։",
-};
+    "Բոլոր հոդվածները տեխնոլոգիաների, արհեստական բանականության, ծրագրավորման և կիբեռանվտանգության մասին՝ հայերենով։",
+  path: "/blog/",
+});
 
 export default async function BlogPage() {
   const posts = await getPublishedPosts();

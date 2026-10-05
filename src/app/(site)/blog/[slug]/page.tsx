@@ -18,6 +18,10 @@ import {
   getPublishedPost,
   getPublishedPosts,
 } from "@/features/blog/lib/queries";
+import { getCategory } from "@/features/blog/config/categories";
+import { JsonLd } from "@/features/seo/components/JsonLd";
+import { pageMetadata } from "@/features/seo/lib/metadata";
+import { blogPostingSchema } from "@/features/seo/lib/schema";
 
 // Prerender existing posts at build; new ones render on first visit and are cached
 export async function generateStaticParams() {
@@ -31,17 +35,18 @@ export async function generateMetadata(
   const { slug } = await props.params;
   const post = await getPublishedPost(slug);
   if (!post) return {};
-  return {
+  return pageMetadata({
     title: post.title,
     description: post.description,
-    openGraph: {
-      type: "article",
-      title: post.title,
-      description: post.description,
+    path: `/blog/${post.slug}/`,
+    image: `/blog/${post.slug}/og.png`,
+    article: {
       publishedTime: post.date,
+      modifiedTime: post.updatedAt,
       tags: post.tags,
+      section: getCategory(post.category).name,
     },
-  };
+  });
 }
 
 export default async function PostPage(props: PageProps<"/blog/[slug]">) {
@@ -59,6 +64,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
 
   return (
     <article>
+      <JsonLd data={blogPostingSchema(post)} />
       <ReadingProgress />
 
       <header className="relative isolate overflow-hidden">

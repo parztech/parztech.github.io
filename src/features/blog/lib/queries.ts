@@ -23,6 +23,8 @@ export type PostMeta = {
   date: string;
   /** Armenian date label, formatted on the server (browsers may lack hy locale data) */
   dateLabel: string;
+  /** Last edit time, for sitemap and structured data */
+  updatedAt: string;
   category: string;
   tags: string[];
   author: string;
@@ -44,6 +46,7 @@ function toMeta(row: PostRow): PostMeta {
     description: row.description,
     date,
     dateLabel: formatDate(date),
+    updatedAt: row.updatedAt.toISOString(),
     category: row.category,
     tags: row.tags,
     author: siteConfig.author,
