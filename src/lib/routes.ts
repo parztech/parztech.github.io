@@ -1,0 +1,15 @@
+export const routes = {
+  home: "/",
+  blog: "/blog/",
+  about: "/about/",
+  rss: "/rss.xml",
+  defaultOgImage: "/og.png",
+  logo: "/logo.png",
+  post: (slug: string) => `/blog/${slug}/`,
+  postOgImage: (slug: string) => `/blog/${slug}/og.png`,
+  category: (slug: string) => `/blog/?category=${slug}`,
+  admin: "/admin/",
+  adminLogin: "/admin/login/",
+  adminNewPost: "/admin/posts/new/",
+  adminEditPost: (id: string) => `/admin/posts/${id}/`,
+} as const;

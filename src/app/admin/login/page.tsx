@@ -4,9 +4,10 @@ import { auth, devLoginEnabled, isAdmin, signIn } from "@/features/auth/auth";
 import { GitHubIcon } from "@/components/GitHubIcon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { routes } from "@/lib/routes";
 
 export default async function LoginPage(props: PageProps<"/admin/login">) {
-  if (isAdmin(await auth())) redirect("/admin/");
+  if (isAdmin(await auth())) redirect(routes.admin);
   const { error } = await props.searchParams;
 
   return (
@@ -29,7 +30,7 @@ export default async function LoginPage(props: PageProps<"/admin/login">) {
         <form
           action={async () => {
             "use server";
-            await signIn("github", { redirectTo: "/admin/" });
+            await signIn("github", { redirectTo: routes.admin });
           }}
         >
           <Button type="submit" size="lg" className="h-11 w-full rounded-full">
@@ -42,7 +43,7 @@ export default async function LoginPage(props: PageProps<"/admin/login">) {
           <form
             action={async () => {
               "use server";
-              await signIn("dev", { redirectTo: "/admin/" });
+              await signIn("dev", { redirectTo: routes.admin });
             }}
           >
             <Button

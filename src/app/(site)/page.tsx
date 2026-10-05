@@ -16,11 +16,12 @@ import { pageMetadata } from "@/features/seo/lib/metadata";
 import { websiteSchema } from "@/features/seo/lib/schema";
 import { getPublishedPosts } from "@/features/blog/lib/queries";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = pageMetadata({
   title: `${siteConfig.name} | ${siteConfig.tagline}`,
   description: siteConfig.description,
-  path: "/",
+  path: routes.home,
   absoluteTitle: true,
 });
 
@@ -41,7 +42,6 @@ export default async function Home() {
   return (
     <>
       <JsonLd data={websiteSchema()} />
-      {/* Hero */}
       <section className="relative isolate overflow-hidden border-b">
         <div className="absolute inset-0 -z-10 bg-grid mask-[radial-gradient(ellipse_at_top,black,transparent_70%)] opacity-70" />
         <div className="absolute -top-48 left-1/2 -z-10 h-130 w-240 -translate-x-1/2 rounded-full bg-linear-to-r from-brand-violet/35 via-brand-pink/25 to-brand-apricot/35 blur-3xl" />
@@ -49,7 +49,7 @@ export default async function Home() {
         <div className="mx-auto flex max-w-4xl flex-col items-center px-4 pt-20 pb-16 text-center sm:px-6 md:pt-28 md:pb-20">
           {latest && (
             <Link
-              href={`/blog/${latest.slug}/`}
+              href={routes.post(latest.slug)}
               className="group mb-8 inline-flex max-w-full items-center gap-2 rounded-full border bg-background/70 py-1 pr-3 pl-1 text-sm shadow-sm backdrop-blur transition-colors hover:border-primary/40"
             >
               <Badge className="rounded-full">Նոր</Badge>
@@ -70,7 +70,7 @@ export default async function Home() {
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/blog/"
+              href={routes.blog}
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "h-11 rounded-full px-6 shadow-lg shadow-primary/25",
@@ -80,7 +80,7 @@ export default async function Home() {
               <ArrowRight />
             </Link>
             <Link
-              href="/about/"
+              href={routes.about}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "h-11 rounded-full bg-background/60 px-6 backdrop-blur",
@@ -104,21 +104,19 @@ export default async function Home() {
       </section>
 
       <div className="mx-auto max-w-6xl space-y-24 px-4 pt-20 sm:px-6">
-        {!featured && (
-          <section>
+        <section>
+          {featured ? (
+            <>
+              <SectionHeading
+                eyebrow="Խմբագրի ընտրություն"
+                title="Ընտրված հոդված"
+              />
+              <FeaturedPost post={featured} />
+            </>
+          ) : (
             <EmptyPosts />
-          </section>
-        )}
-
-        {featured && (
-          <section>
-            <SectionHeading
-              eyebrow="Խմբագրի ընտրություն"
-              title="Ընտրված հոդված"
-            />
-            <FeaturedPost post={featured} />
-          </section>
-        )}
+          )}
+        </section>
 
         <section>
           <SectionHeading
@@ -132,7 +130,7 @@ export default async function Home() {
               return (
                 <Link
                   key={c.slug}
-                  href={`/blog/?category=${c.slug}`}
+                  href={routes.category(c.slug)}
                   className="group"
                 >
                   <Card className="h-full gap-4 p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-primary/10 group-hover:ring-primary/30">
@@ -164,7 +162,7 @@ export default async function Home() {
           <section>
             <SectionHeading eyebrow="Բլոգ" title="Վերջին հոդվածները">
               <Link
-                href="/blog/"
+                href={routes.blog}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
                   "rounded-full",
@@ -182,7 +180,6 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Closing CTA */}
         <section className="relative isolate overflow-hidden rounded-3xl bg-linear-to-br from-brand-violet via-brand-pink to-brand-apricot px-6 py-16 text-center text-white shadow-2xl shadow-brand-violet/20 sm:px-12">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(white_1px,transparent_1px)] mask-[radial-gradient(ellipse_at_center,black,transparent_70%)] bg-size-[20px_20px] opacity-25" />
           <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-balance md:text-4xl">
@@ -193,7 +190,7 @@ export default async function Home() {
             ընկերներիդ հետ։
           </p>
           <Link
-            href="/blog/"
+            href={routes.blog}
             className={cn(
               buttonVariants({ size: "lg" }),
               "mt-8 h-11 rounded-full bg-white px-6 text-brand-violet hover:bg-white/90",

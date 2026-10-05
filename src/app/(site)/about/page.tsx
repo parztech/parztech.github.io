@@ -13,12 +13,13 @@ import {
 import { siteConfig } from "@/config/site";
 import { pageMetadata } from "@/features/seo/lib/metadata";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = pageMetadata({
   title: "Մեր մասին",
   description:
     "Ովքեր ենք մենք և ինչու ենք ստեղծել Parz Tech-ը՝ հայալեզու բլոգ տեխնոլոգիաների և արհեստական բանականության մասին։",
-  path: "/about/",
+  path: routes.about,
 });
 
 const values = [
@@ -87,7 +88,7 @@ export default function AboutPage() {
 
         <div className="mt-16 text-center">
           <Link
-            href="/blog/"
+            href={routes.blog}
             className={cn(
               buttonVariants({ size: "lg" }),
               "h-11 rounded-full px-6",

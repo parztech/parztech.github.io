@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import type { Provider } from "next-auth/providers";
 
+import { routes } from "@/lib/routes";
+
 const DEV_LOGIN = "dev-admin";
 
 /** One-click login for local development only; never enabled in production builds */
@@ -10,18 +12,25 @@ export const devLoginEnabled =
   process.env.NODE_ENV === "development" &&
   process.env.AUTH_DEV_LOGIN === "true";
 
-function adminLogins() {
-  return (process.env.ADMIN_GITHUB_LOGINS ?? "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
+function normalizeLogin(login: unknown) {
+  return typeof login === "string" ? login.trim().toLowerCase() : "";
+}
+
+function isAllowedGithubLogin(login: unknown) {
+  const normalized = normalizeLogin(login);
+  return (
+    normalized !== "" &&
+    (process.env.ADMIN_GITHUB_LOGINS ?? "")
+      .split(",")
+      .map(normalizeLogin)
+      .includes(normalized)
+  );
 }
 
 export function isAdmin(session: Session | null) {
-  const login = session?.user?.login?.toLowerCase();
-  if (!login) return false;
+  const login = session?.user?.login;
   if (login === DEV_LOGIN) return devLoginEnabled;
-  return adminLogins().includes(login);
+  return isAllowedGithubLogin(login);
 }
 
 const providers: Provider[] = [GitHub];
@@ -39,17 +48,18 @@ if (devLoginEnabled) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
-  pages: { signIn: "/admin/login/", error: "/admin/login/" },
+  pages: { signIn: routes.adminLogin, error: routes.adminLogin },
   callbacks: {
     signIn({ account, profile }) {
       if (account?.provider === "dev") return devLoginEnabled;
-      const login = String(profile?.login ?? "").toLowerCase();
-      return adminLogins().includes(login);
+      return isAllowedGithubLogin(profile?.login);
     },
     jwt({ token, account, profile }) {
       if (account) {
         token.login =
-          account.provider === "dev" ? DEV_LOGIN : String(profile?.login);
+          account.provider === "dev"
+            ? DEV_LOGIN
+            : normalizeLogin(profile?.login);
       }
       return token;
     },

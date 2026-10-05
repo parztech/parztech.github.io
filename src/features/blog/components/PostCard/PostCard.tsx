@@ -5,12 +5,13 @@ import { CategoryBadge } from "@/features/blog/components/CategoryBadge";
 import { PostCover } from "@/features/blog/components/PostCover";
 import { PostMetaLine } from "@/features/blog/components/PostMetaLine";
 import { Card } from "@/components/ui/card";
+import { routes } from "@/lib/routes";
 
 import type { PostCardProps } from "./types";
 
 export default function PostCard({ post }: PostCardProps) {
   return (
-    <Link href={`/blog/${post.slug}/`} className="group block h-full">
+    <Link href={routes.post(post.slug)} className="group block h-full">
       <Card className="h-full gap-0 py-0 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:ring-primary/30">
         <PostCover category={post.category} className="aspect-16/9" />
         <div className="flex flex-1 flex-col gap-3 p-5">

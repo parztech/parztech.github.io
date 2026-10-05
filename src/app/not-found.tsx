@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 
 export default function NotFound() {
   return (
@@ -18,7 +19,7 @@ export default function NotFound() {
             Կարծես այս էջը գոյություն չունի կամ տեղափոխվել է։
           </p>
           <Link
-            href="/"
+            href={routes.home}
             className={cn(
               buttonVariants({ variant: "outline" }),
               "mt-8 rounded-full",

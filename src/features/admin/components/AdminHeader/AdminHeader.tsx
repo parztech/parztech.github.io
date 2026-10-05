@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 
 export default async function AdminHeader() {
   const session = await auth();
@@ -24,7 +25,7 @@ export default async function AdminHeader() {
         </div>
         <div className="flex items-center gap-1">
           <Link
-            href="/"
+            href={routes.home}
             target="_blank"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
@@ -44,7 +45,7 @@ export default async function AdminHeader() {
               <form
                 action={async () => {
                   "use server";
-                  await signOut({ redirectTo: "/admin/login/" });
+                  await signOut({ redirectTo: routes.adminLogin });
                 }}
               >
                 <Button

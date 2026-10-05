@@ -58,7 +58,13 @@ export default function DeletePostButton({
             disabled={pending}
             onClick={() =>
               startTransition(async () => {
-                await deletePost(id);
+                try {
+                  await deletePost(id);
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Չհաջողվեց ջնջել հոդվածը");
+                  return;
+                }
                 toast.success("Հոդվածը ջնջված է");
                 if (onDeleted) onDeleted();
                 else router.refresh();

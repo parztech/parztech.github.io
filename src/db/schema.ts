@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 export const postStatuses = ["draft", "published"] as const;
 export type PostStatus = (typeof postStatuses)[number];
@@ -31,3 +37,39 @@ export const posts = sqliteTable("posts", {
 });
 
 export type PostRow = typeof posts.$inferSelect;
+
+export const reactionTypes = [
+  "love",
+  "fire",
+  "clap",
+  "mindblown",
+  "idea",
+] as const;
+export type ReactionType = (typeof reactionTypes)[number];
+
+export const reactions = sqliteTable(
+  "reactions",
+  {
+    id: text()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    postId: text()
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    /** SHA-256 of the anonymous visitor cookie; the raw cookie is never stored */
+    visitorHash: text().notNull(),
+    type: text({ enum: reactionTypes }).notNull(),
+    createdAt: integer({ mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [
+    // One reaction of each type per visitor per post
+    uniqueIndex("reactions_post_visitor_type_unique").on(
+      t.postId,
+      t.visitorHash,
+      t.type,
+    ),
+    index("reactions_post_idx").on(t.postId),
+  ],
+);

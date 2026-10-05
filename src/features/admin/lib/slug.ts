@@ -1,5 +1,5 @@
 // Armenian → Latin transliteration so post URLs stay readable and shareable
-const map: Record<string, string> = {
+const ARMENIAN_TO_LATIN: Record<string, string> = {
   ա: "a",
   բ: "b",
   գ: "g",
@@ -41,15 +41,23 @@ const map: Record<string, string> = {
   և: "ev",
 };
 
-export function slugify(input: string) {
-  return input
+const MAX_SLUG_LENGTH = 80;
+
+/**
+ * Turns any text into a URL slug. With `whileTyping`, a trailing hyphen is kept
+ * so the slug field doesn't swallow "-" as the user types it.
+ */
+export function slugify(input: string, { whileTyping = false } = {}) {
+  const slug = input
     .toLowerCase()
     .replace(/ու/g, "u")
-    .replace(/./gu, (ch) => map[ch] ?? ch)
+    .replace(/./gu, (ch) => ARMENIAN_TO_LATIN[ch] ?? ch)
     .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+    .slice(0, MAX_SLUG_LENGTH)
+    .replace(/^-+/, "");
+  return whileTyping ? slug : slug.replace(/-+$/, "");
 }
 
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

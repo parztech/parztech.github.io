@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import { getCategory } from "@/features/blog/config/categories";
 import type { PostMeta } from "@/features/blog/lib/queries";
 import { absoluteUrl } from "@/lib/site-url";
+import { routes } from "@/lib/routes";
 
 const ORGANIZATION_ID = absoluteUrl("/#organization");
 const WEBSITE_ID = absoluteUrl("/#website");
@@ -16,8 +17,8 @@ export function websiteSchema() {
         "@id": ORGANIZATION_ID,
         name: siteConfig.name,
         alternateName: siteConfig.alternateNames,
-        url: absoluteUrl("/"),
-        logo: absoluteUrl("/logo.png"),
+        url: absoluteUrl(routes.home),
+        logo: absoluteUrl(routes.logo),
         description: siteConfig.description,
       },
       {
@@ -25,7 +26,7 @@ export function websiteSchema() {
         "@id": WEBSITE_ID,
         name: siteConfig.name,
         alternateName: siteConfig.alternateNames,
-        url: absoluteUrl("/"),
+        url: absoluteUrl(routes.home),
         description: siteConfig.description,
         inLanguage: "hy",
         publisher: { "@id": ORGANIZATION_ID },
@@ -35,7 +36,7 @@ export function websiteSchema() {
 }
 
 export function blogPostingSchema(post: PostMeta) {
-  const url = absoluteUrl(`/blog/${post.slug}/`);
+  const url = absoluteUrl(routes.post(post.slug));
   const category = getCategory(post.category);
 
   return {
@@ -48,7 +49,7 @@ export function blogPostingSchema(post: PostMeta) {
         description: post.description,
         url,
         mainEntityOfPage: url,
-        image: absoluteUrl(`/blog/${post.slug}/og.png`),
+        image: absoluteUrl(routes.postOgImage(post.slug)),
         datePublished: post.date,
         dateModified: post.updatedAt,
         inLanguage: "hy",
@@ -69,13 +70,13 @@ export function blogPostingSchema(post: PostMeta) {
             "@type": "ListItem",
             position: 1,
             name: "Գլխավոր",
-            item: absoluteUrl("/"),
+            item: absoluteUrl(routes.home),
           },
           {
             "@type": "ListItem",
             position: 2,
             name: "Բլոգ",
-            item: absoluteUrl("/blog/"),
+            item: absoluteUrl(routes.blog),
           },
           { "@type": "ListItem", position: 3, name: post.title, item: url },
         ],

@@ -4,6 +4,7 @@ import { Logo } from "@/components/layout/Logo";
 import { Separator } from "@/components/ui/separator";
 import { categories } from "@/features/blog/config/categories";
 import { siteConfig } from "@/config/site";
+import { routes } from "@/lib/routes";
 
 export default function SiteFooter() {
   return (
@@ -33,7 +34,7 @@ export default function SiteFooter() {
             {categories.map((c) => (
               <li key={c.slug}>
                 <Link
-                  href={`/blog/?category=${c.slug}`}
+                  href={routes.category(c.slug)}
                   className="hover:text-foreground"
                 >
                   {c.name}

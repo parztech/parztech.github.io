@@ -1,24 +1,35 @@
 "use client";
 
 import { Search, SearchX } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { PostCard } from "@/features/blog/components/PostCard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { categories } from "@/features/blog/config/categories";
+import { routes } from "@/lib/routes";
 
 import { ALL_CATEGORIES } from "./constants";
 import type { PostsExplorerProps } from "./types";
 
 export default function PostsExplorer({ posts }: PostsExplorerProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const initial = searchParams.get("category");
-  const [category, setCategory] = useState(
-    categories.some((c) => c.slug === initial) ? initial! : ALL_CATEGORIES,
-  );
+  // The URL is the source of truth, so footer/home topic links work on this page too
+  const requested = searchParams.get("category");
+  const category =
+    requested && categories.some((c) => c.slug === requested)
+      ? requested
+      : ALL_CATEGORIES;
   const [query, setQuery] = useState("");
+
+  function selectCategory(slug: string) {
+    router.replace(
+      slug === ALL_CATEGORIES ? routes.blog : routes.category(slug),
+      { scroll: false },
+    );
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,7 +57,10 @@ export default function PostsExplorer({ posts }: PostsExplorerProps) {
           />
         </div>
         <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          <Tabs value={category} onValueChange={(v) => setCategory(String(v))}>
+          <Tabs
+            value={category}
+            onValueChange={(v) => selectCategory(String(v))}
+          >
             <TabsList className="h-10! rounded-full bg-muted p-1">
               <TabsTrigger value={ALL_CATEGORIES} className="rounded-full px-4">
                 Բոլորը

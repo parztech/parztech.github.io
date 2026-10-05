@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 
 import { siteConfig } from "@/config/site";
+import { OG_SIZE } from "@/features/seo/lib/og";
+import { routes } from "@/lib/routes";
 
 type PageMetadataInput = {
   title: string;
   description: string;
-  /** Path with trailing slash, e.g. "/blog/my-post/" */
   path: string;
   /** Use the title as-is instead of the "%s | Parz Tech" template */
   absoluteTitle?: boolean;
-  /** Social preview image path; defaults to the site-wide card (/og.png) */
+  /** Social preview image path; defaults to the site-wide card */
   image?: string;
   article?: {
     publishedTime: string;
@@ -18,9 +19,6 @@ type PageMetadataInput = {
     section: string;
   };
 };
-
-export const RSS_PATH = "/rss.xml";
-export const DEFAULT_OG_IMAGE = "/og.png";
 
 /**
  * Builds per-page metadata. Next.js merges metadata shallowly, so each page
@@ -35,7 +33,7 @@ export function pageMetadata({
   article,
 }: PageMetadataInput): Metadata {
   const images = [
-    { url: image ?? DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: title },
+    { url: image ?? routes.defaultOgImage, ...OG_SIZE, alt: title },
   ];
 
   return {
@@ -43,7 +41,7 @@ export function pageMetadata({
     description,
     alternates: {
       canonical: path,
-      types: { "application/rss+xml": RSS_PATH },
+      types: { "application/rss+xml": routes.rss },
     },
     openGraph: {
       type: article ? "article" : "website",

@@ -19,9 +19,11 @@ import {
   getPublishedPosts,
 } from "@/features/blog/lib/queries";
 import { getCategory } from "@/features/blog/config/categories";
+import { PostReactions } from "@/features/reactions/components/PostReactions";
 import { JsonLd } from "@/features/seo/components/JsonLd";
 import { pageMetadata } from "@/features/seo/lib/metadata";
 import { blogPostingSchema } from "@/features/seo/lib/schema";
+import { routes } from "@/lib/routes";
 
 // Prerender existing posts at build; new ones render on first visit and are cached
 export async function generateStaticParams() {
@@ -38,8 +40,8 @@ export async function generateMetadata(
   return pageMetadata({
     title: post.title,
     description: post.description,
-    path: `/blog/${post.slug}/`,
-    image: `/blog/${post.slug}/og.png`,
+    path: routes.post(post.slug),
+    image: routes.postOgImage(post.slug),
     article: {
       publishedTime: post.date,
       modifiedTime: post.updatedAt,
@@ -71,7 +73,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
         <div className="absolute inset-0 -z-10 bg-grid mask-[radial-gradient(ellipse_at_top,black,transparent_65%)] opacity-60" />
         <div className="mx-auto max-w-3xl px-4 pt-12 pb-10 sm:px-6 md:pt-16">
           <Link
-            href="/blog/"
+            href={routes.blog}
             className="mb-8 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
@@ -115,6 +117,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
       <div className="mx-auto mt-12 grid max-w-5xl gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_220px]">
         <div className="min-w-0">
           <PostBody html={post.html} />
+          <PostReactions postId={post.id} />
 
           {post.tags.length > 0 && (
             <div className="mt-12 flex flex-wrap items-center gap-2">

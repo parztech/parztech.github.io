@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { getPublishedPosts } from "@/features/blog/lib/queries";
 import { absoluteUrl } from "@/lib/site-url";
+import { routes } from "@/lib/routes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPublishedPosts();
@@ -9,20 +10,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: absoluteUrl("/"),
+      url: absoluteUrl(routes.home),
       lastModified: latest,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: absoluteUrl("/blog/"),
+      url: absoluteUrl(routes.blog),
       lastModified: latest,
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    { url: absoluteUrl("/about/"), changeFrequency: "yearly", priority: 0.5 },
+    {
+      url: absoluteUrl(routes.about),
+      changeFrequency: "yearly",
+      priority: 0.5,
+    },
     ...posts.map((post) => ({
-      url: absoluteUrl(`/blog/${post.slug}/`),
+      url: absoluteUrl(routes.post(post.slug)),
       lastModified: post.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.8,

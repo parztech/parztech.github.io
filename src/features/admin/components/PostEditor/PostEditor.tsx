@@ -48,11 +48,12 @@ import { slugify } from "@/features/admin/lib/slug";
 import { PostBody } from "@/features/blog/components/PostBody";
 import { categories } from "@/features/blog/config/categories";
 import type { EditorPost } from "@/features/admin/types";
+import { countWords, readingMinutesForWords } from "@/lib/reading-time";
+import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 import { CATEGORY_ITEMS, EMPTY_POST } from "./constants";
 import type { EditorTab, PostEditorProps } from "./types";
-import { countWords, estimateReadingMinutes } from "./utils";
 
 export default function PostEditor({ initial }: PostEditorProps) {
   const router = useRouter();
@@ -65,6 +66,8 @@ export default function PostEditor({ initial }: PostEditorProps) {
   const [saving, startSaving] = useTransition();
   const [previewing, startPreview] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Ignores preview responses that arrive after a newer preview was requested
+  const previewRequestRef = useRef(0);
 
   const dirty = JSON.stringify(post) !== saved;
   const isPublished = post.status === "published";
@@ -83,34 +86,54 @@ export default function PostEditor({ initial }: PostEditorProps) {
   }
 
   function save(status: EditorPost["status"]) {
+    if (saving) return;
+    const wasPublished = isPublished;
+    const submitted = { ...post, status };
+
     startSaving(async () => {
-      const next = { ...post, status };
-      const result = await savePost(next);
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
+      try {
+        const result = await savePost(submitted);
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+        // Only merge server-assigned fields: edits made while saving must survive
+        setPost((current) => ({
+          ...current,
+          id: result.id,
+          status: result.status,
+        }));
+        setSaved(JSON.stringify({ ...submitted, id: result.id }));
+        toast.success(
+          status === "draft"
+            ? "Սևագիրը պահպանված է"
+            : wasPublished
+              ? "Հոդվածը թարմացված է"
+              : "Հոդվածը հրապարակված է 🎉",
+        );
+        if (submitted.id) router.refresh();
+        else router.replace(routes.adminEditPost(result.id));
+      } catch (error) {
+        console.error(error);
+        toast.error("Չհաջողվեց պահպանել։ Ստուգիր կապը և փորձիր կրկին։");
       }
-      const savedPost = { ...next, id: result.id };
-      setPost(savedPost);
-      setSaved(JSON.stringify(savedPost));
-      toast.success(
-        status === "published"
-          ? isPublished
-            ? "Հոդվածը թարմացված է"
-            : "Հոդվածը հրապարակված է 🎉"
-          : "Սևագիրը պահպանված է",
-      );
-      if (!post.id) router.replace(`/admin/posts/${result.id}/`);
-      else router.refresh();
     });
   }
 
   function showPreview() {
     setTab("preview");
+    const request = ++previewRequestRef.current;
     startPreview(async () => {
-      setPreviewHtml(
-        await previewMarkdown(post.content || "_Դեռ բովանդակություն չկա_"),
-      );
+      try {
+        const html = await previewMarkdown(
+          post.content || "_Դեռ բովանդակություն չկա_",
+        );
+        if (request === previewRequestRef.current) setPreviewHtml(html);
+      } catch (error) {
+        console.error(error);
+        toast.error("Չհաջողվեց բեռնել նախադիտումը");
+        setTab("write");
+      }
     });
   }
 
@@ -141,7 +164,7 @@ export default function PostEditor({ initial }: PostEditorProps) {
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link
-            href="/admin/"
+            href={routes.admin}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft />
@@ -279,7 +302,7 @@ export default function PostEditor({ initial }: PostEditorProps) {
 
             <div className="flex justify-between border-t px-5 py-2 text-xs text-muted-foreground">
               <span>
-                {words} բառ · մոտ {estimateReadingMinutes(words)} րոպե
+                {words} բառ · մոտ {readingMinutesForWords(words)} րոպե
                 ընթերցանություն
               </span>
               <span className="hidden sm:inline">⌘S՝ պահպանել</span>
@@ -295,14 +318,18 @@ export default function PostEditor({ initial }: PostEditorProps) {
             <div className="space-y-2">
               <Label htmlFor="slug">Հասցե (URL)</Label>
               <div className="flex items-center rounded-lg border bg-muted/40 pl-3 text-sm focus-within:ring-3 focus-within:ring-ring/50">
-                <span className="text-muted-foreground">/blog/</span>
+                <span className="text-muted-foreground">{routes.blog}</span>
                 <Input
                   id="slug"
                   value={post.slug}
                   onChange={(e) => {
                     setSlugTouched(true);
-                    update("slug", slugify(e.target.value) || e.target.value);
+                    update(
+                      "slug",
+                      slugify(e.target.value, { whileTyping: true }),
+                    );
                   }}
+                  onBlur={() => update("slug", slugify(post.slug))}
                   placeholder="hodvatsi-hasce"
                   className="border-none bg-transparent! pl-0.5 shadow-none focus-visible:ring-0"
                 />
@@ -366,7 +393,7 @@ export default function PostEditor({ initial }: PostEditorProps) {
             <Card className="gap-2 px-5">
               {isPublished && (
                 <Link
-                  href={`/blog/${post.slug}/`}
+                  href={routes.post(post.slug)}
                   target="_blank"
                   className={cn(
                     buttonVariants({ variant: "outline" }),
@@ -382,7 +409,7 @@ export default function PostEditor({ initial }: PostEditorProps) {
                 <DeletePostButton
                   id={post.id}
                   title={post.title}
-                  onDeleted={() => router.replace("/admin/")}
+                  onDeleted={() => router.replace(routes.admin)}
                 />
               </div>
             </Card>

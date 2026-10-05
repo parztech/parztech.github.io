@@ -17,5 +17,3 @@ export const CATEGORY_ITEMS = categories.map((c) => ({
   value: c.slug,
   label: c.name,
 }));
-
-export const WORDS_PER_MINUTE = 200;

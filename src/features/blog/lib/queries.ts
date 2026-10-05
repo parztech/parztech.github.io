@@ -1,29 +1,23 @@
 import "server-only";
 
 import { and, desc, eq } from "drizzle-orm";
-import readingTime from "reading-time";
 import { cache } from "react";
 
 import { siteConfig } from "@/config/site";
 import { db } from "@/db";
 import { posts, type PostRow } from "@/db/schema";
+import { renderMarkdown, type Heading } from "@/features/blog/lib/markdown";
 import { formatDate } from "@/lib/format";
-import {
-  extractHeadings,
-  renderMarkdown,
-  type Heading,
-} from "@/features/blog/lib/markdown";
-
-export type { Heading };
+import { getReadingMinutes } from "@/lib/reading-time";
 
 export type PostMeta = {
+  id: string;
   slug: string;
   title: string;
   description: string;
   date: string;
-  /** Armenian date label, formatted on the server (browsers may lack hy locale data) */
+  /** Formatted on the server: browsers may lack Armenian locale data */
   dateLabel: string;
-  /** Last edit time, for sitemap and structured data */
   updatedAt: string;
   category: string;
   tags: string[];
@@ -34,13 +28,10 @@ export type PostMeta = {
 
 export type Post = PostMeta & { html: string; headings: Heading[] };
 
-export function getReadingMinutes(markdown: string) {
-  return Math.max(1, Math.round(readingTime(markdown).minutes));
-}
-
 function toMeta(row: PostRow): PostMeta {
   const date = (row.publishedAt ?? row.createdAt).toISOString();
   return {
+    id: row.id,
     slug: row.slug,
     title: row.title,
     description: row.description,
@@ -72,10 +63,6 @@ export const getPublishedPost = cache(
       .where(and(eq(posts.slug, slug), eq(posts.status, "published")))
       .limit(1);
     if (!row) return null;
-    return {
-      ...toMeta(row),
-      html: await renderMarkdown(row.content),
-      headings: extractHeadings(row.content),
-    };
+    return { ...toMeta(row), ...(await renderMarkdown(row.content)) };
   },
 );

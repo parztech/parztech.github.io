@@ -1,3 +1,5 @@
+import { routes } from "@/lib/routes";
+
 export const siteConfig = {
   name: "Parz Tech",
   tagline: "Տեխնոլոգիաներ և արհեստական բանականություն՝ պարզ լեզվով",
@@ -8,9 +10,9 @@ export const siteConfig = {
   locale: "hy_AM",
   author: "Parz Tech խմբագրություն",
   nav: [
-    { title: "Գլխավոր", href: "/" },
-    { title: "Բլոգ", href: "/blog/" },
-    { title: "Մեր մասին", href: "/about/" },
+    { title: "Գլխավոր", href: routes.home },
+    { title: "Բլոգ", href: routes.blog },
+    { title: "Մեր մասին", href: routes.about },
   ],
 } as const;
 

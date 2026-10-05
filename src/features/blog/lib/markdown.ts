@@ -1,6 +1,7 @@
 import "server-only";
 
-import GithubSlugger from "github-slugger";
+import type { Root } from "hast";
+import { toString } from "hast-util-to-string";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
@@ -8,8 +9,36 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
+import { visit } from "unist-util-visit";
+import type { VFile } from "vfile";
 
 export type Heading = { id: string; text: string; level: 2 | 3 };
+
+declare module "vfile" {
+  interface DataMap {
+    headings: Heading[];
+  }
+}
+
+/** Collects h2/h3 after rehype-slug, so TOC ids always match the rendered HTML */
+function rehypeCollectHeadings() {
+  return (tree: Root, file: VFile) => {
+    const headings: Heading[] = [];
+    visit(tree, "element", (node) => {
+      if (
+        (node.tagName === "h2" || node.tagName === "h3") &&
+        node.properties.id
+      ) {
+        headings.push({
+          id: String(node.properties.id),
+          text: toString(node),
+          level: node.tagName === "h2" ? 2 : 3,
+        });
+      }
+    });
+    file.data.headings = headings;
+  };
+}
 
 // Raw HTML in markdown is dropped (remark-rehype default), so output is safe to inject
 const processor = unified()
@@ -17,6 +46,7 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype)
   .use(rehypeSlug)
+  .use(rehypeCollectHeadings)
   .use(rehypePrettyCode, {
     theme: { light: "github-light", dark: "github-dark-dimmed" },
     keepBackground: false,
@@ -24,14 +54,9 @@ const processor = unified()
   .use(rehypeStringify);
 
 export async function renderMarkdown(markdown: string) {
-  return String(await processor.process(markdown));
-}
-
-// Mirrors rehype-slug (which also uses github-slugger) so TOC ids match
-export function extractHeadings(markdown: string): Heading[] {
-  const slugger = new GithubSlugger();
-  return [...markdown.matchAll(/^(#{2,3})\s+(.+)$/gm)].map((m) => {
-    const text = m[2].replace(/[*_`]/g, "").trim();
-    return { id: slugger.slug(text), text, level: m[1].length as 2 | 3 };
-  });
+  const file = await processor.process(markdown);
+  return {
+    html: String(file),
+    headings: file.data.headings ?? [],
+  };
 }

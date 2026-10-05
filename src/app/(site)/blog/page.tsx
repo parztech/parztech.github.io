@@ -5,12 +5,13 @@ import { PostsExplorer } from "@/features/blog/components/PostsExplorer";
 import { EmptyPosts } from "@/features/blog/components/EmptyPosts";
 import { pageMetadata } from "@/features/seo/lib/metadata";
 import { getPublishedPosts } from "@/features/blog/lib/queries";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = pageMetadata({
   title: "Բլոգ",
   description:
     "Բոլոր հոդվածները տեխնոլոգիաների, արհեստական բանականության, ծրագրավորման և կիբեռանվտանգության մասին՝ հայերենով։",
-  path: "/blog/",
+  path: routes.blog,
 });
 
 export default async function BlogPage() {

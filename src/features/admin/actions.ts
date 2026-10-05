@@ -1,15 +1,16 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { categories } from "@/features/blog/config/categories";
 import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { requireAdmin } from "@/features/auth/require-admin";
-import { renderMarkdown } from "@/features/blog/lib/markdown";
+import { posts, postStatuses, reactions, type PostStatus } from "@/db/schema";
 import { SLUG_PATTERN } from "@/features/admin/lib/slug";
+import { requireAdmin } from "@/features/auth/require-admin";
+import { categories } from "@/features/blog/config/categories";
+import { renderMarkdown } from "@/features/blog/lib/markdown";
+import { routes } from "@/lib/routes";
 
 const postInput = z.object({
   id: z.string().optional(),
@@ -26,20 +27,27 @@ const postInput = z.object({
   category: z.enum(categories.map((c) => c.slug) as [string, ...string[]]),
   tags: z.array(z.string().trim().min(1)).max(10),
   featured: z.boolean(),
-  status: z.enum(["draft", "published"]),
+  status: z.enum(postStatuses),
 });
 
 export type PostInput = z.infer<typeof postInput>;
 
 export type SaveResult =
-  | { ok: true; id: string; slug: string; status: "draft" | "published" }
-  | { ok: false; error: string };
+  { ok: true; id: string; status: PostStatus } | { ok: false; error: string };
 
 // Public pages are prerendered; refresh them all after any change (small blog)
 function refreshSite() {
-  revalidatePath("/", "layout");
+  revalidatePath(routes.home, "layout");
   revalidatePath("/sitemap.xml");
-  revalidatePath("/rss.xml");
+  revalidatePath(routes.rss);
+}
+
+/** The DB unique index is the source of truth, which also covers concurrent saves */
+function isSlugTaken(error: unknown) {
+  for (let e = error; e instanceof Error; e = e.cause) {
+    if (e.message.includes("UNIQUE constraint failed: posts.slug")) return true;
+  }
+  return false;
 }
 
 export async function savePost(input: PostInput): Promise<SaveResult> {
@@ -50,48 +58,49 @@ export async function savePost(input: PostInput): Promise<SaveResult> {
     return { ok: false, error: parsed.error.issues[0].message };
   }
   const { id, ...data } = parsed.data;
+  const isPublishing = data.status === "published";
 
-  const [clash] = await db
-    .select({ id: posts.id })
-    .from(posts)
-    .where(eq(posts.slug, data.slug))
-    .limit(1);
-  if (clash && clash.id !== id) {
-    return { ok: false, error: "Այս հասցեով հոդված արդեն կա" };
+  try {
+    const [row] = id
+      ? await db
+          .update(posts)
+          .set({
+            ...data,
+            // Keep the original publish date when re-publishing or editing
+            ...(isPublishing && {
+              publishedAt: sql`coalesce(${posts.publishedAt}, unixepoch())`,
+            }),
+          })
+          .where(eq(posts.id, id))
+          .returning()
+      : await db
+          .insert(posts)
+          .values({ ...data, publishedAt: isPublishing ? new Date() : null })
+          .returning();
+
+    if (!row) return { ok: false, error: "Հոդվածը չի գտնվել" };
+
+    refreshSite();
+    return { ok: true, id: row.id, status: row.status };
+  } catch (error) {
+    if (isSlugTaken(error)) {
+      return { ok: false, error: "Այս հասցեով հոդված արդեն կա" };
+    }
+    throw error;
   }
-
-  const existing = id
-    ? (await db.select().from(posts).where(eq(posts.id, id)).limit(1))[0]
-    : undefined;
-  if (id && !existing) return { ok: false, error: "Հոդվածը չի գտնվել" };
-
-  const publishedAt =
-    data.status === "published"
-      ? (existing?.publishedAt ?? new Date())
-      : (existing?.publishedAt ?? null);
-
-  const [row] = existing
-    ? await db
-        .update(posts)
-        .set({ ...data, publishedAt })
-        .where(eq(posts.id, existing.id))
-        .returning()
-    : await db
-        .insert(posts)
-        .values({ ...data, publishedAt })
-        .returning();
-
-  refreshSite();
-  return { ok: true, id: row.id, slug: row.slug, status: row.status };
 }
 
 export async function deletePost(id: string) {
   await requireAdmin();
-  await db.delete(posts).where(eq(posts.id, id));
+  // Explicit cleanup in case SQLite foreign-key enforcement is off
+  await db.batch([
+    db.delete(reactions).where(eq(reactions.postId, id)),
+    db.delete(posts).where(eq(posts.id, id)),
+  ]);
   refreshSite();
 }
 
 export async function previewMarkdown(markdown: string) {
   await requireAdmin();
-  return renderMarkdown(markdown);
+  return (await renderMarkdown(markdown)).html;
 }

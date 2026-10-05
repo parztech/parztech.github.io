@@ -18,6 +18,7 @@ import {
 import { requireAdmin } from "@/features/auth/require-admin";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 
 export default async function AdminPage() {
   await requireAdmin();
@@ -40,7 +41,7 @@ export default async function AdminPage() {
           </p>
         </div>
         <Link
-          href="/admin/posts/new/"
+          href={routes.adminNewPost}
           className={cn(
             buttonVariants({ size: "lg" }),
             "h-11 rounded-full px-5 shadow-lg shadow-primary/25",
@@ -72,7 +73,7 @@ export default async function AdminPage() {
             </p>
           </div>
           <Link
-            href="/admin/posts/new/"
+            href={routes.adminNewPost}
             className={cn(buttonVariants(), "rounded-full")}
           >
             <PenLine />
@@ -100,13 +101,13 @@ export default async function AdminPage() {
                 <TableRow key={post.id}>
                   <TableCell className="max-w-xs pl-5">
                     <Link
-                      href={`/admin/posts/${post.id}/`}
+                      href={routes.adminEditPost(post.id)}
                       className="block truncate font-medium hover:text-primary"
                     >
                       {post.title}
                     </Link>
                     <span className="block truncate text-xs text-muted-foreground">
-                      /blog/{post.slug}/
+                      {routes.post(post.slug)}
                     </span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -122,7 +123,7 @@ export default async function AdminPage() {
                     <div className="flex justify-end gap-1">
                       {post.status === "published" && (
                         <Link
-                          href={`/blog/${post.slug}/`}
+                          href={routes.post(post.slug)}
                           target="_blank"
                           aria-label="Դիտել կայքում"
                           className={buttonVariants({
@@ -134,7 +135,7 @@ export default async function AdminPage() {
                         </Link>
                       )}
                       <Link
-                        href={`/admin/posts/${post.id}/`}
+                        href={routes.adminEditPost(post.id)}
                         aria-label="Խմբագրել"
                         className={buttonVariants({
                           variant: "ghost",

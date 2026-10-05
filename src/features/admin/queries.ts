@@ -15,17 +15,20 @@ export async function getAllPostsForAdmin() {
 export async function getPostForEditing(
   id: string,
 ): Promise<EditorPost | null> {
-  const [row] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
-  if (!row) return null;
-  return {
-    id: row.id,
-    title: row.title,
-    slug: row.slug,
-    description: row.description,
-    content: row.content,
-    category: row.category,
-    tags: row.tags,
-    featured: row.featured,
-    status: row.status,
-  };
+  const [post] = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      description: posts.description,
+      content: posts.content,
+      category: posts.category,
+      tags: posts.tags,
+      featured: posts.featured,
+      status: posts.status,
+    })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1);
+  return post ?? null;
 }

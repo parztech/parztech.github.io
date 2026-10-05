@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import { getCategory } from "@/features/blog/config/categories";
 import { getPublishedPosts } from "@/features/blog/lib/queries";
 import { absoluteUrl } from "@/lib/site-url";
+import { routes } from "@/lib/routes";
 
 // Built once and refreshed when a post is published (see admin actions)
 export const dynamic = "force-static";
@@ -20,7 +21,7 @@ export async function GET() {
 
   const items = posts
     .map((post) => {
-      const url = absoluteUrl(`/blog/${post.slug}/`);
+      const url = absoluteUrl(routes.post(post.slug));
       return `    <item>
       <title>${escapeXml(post.title)}</title>
       <link>${url}</link>
@@ -36,10 +37,10 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(siteConfig.name)}</title>
-    <link>${absoluteUrl("/")}</link>
+    <link>${absoluteUrl(routes.home)}</link>
     <description>${escapeXml(siteConfig.description)}</description>
     <language>hy</language>
-    <atom:link href="${absoluteUrl("/rss.xml")}" rel="self" type="application/rss+xml" />
+    <atom:link href="${absoluteUrl(routes.rss)}" rel="self" type="application/rss+xml" />
 ${items}
   </channel>
 </rss>`;

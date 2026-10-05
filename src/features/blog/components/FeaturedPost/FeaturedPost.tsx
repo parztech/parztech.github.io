@@ -6,12 +6,13 @@ import { PostCover } from "@/features/blog/components/PostCover";
 import { PostMetaLine } from "@/features/blog/components/PostMetaLine";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { routes } from "@/lib/routes";
 
 import type { FeaturedPostProps } from "./types";
 
 export default function FeaturedPost({ post }: FeaturedPostProps) {
   return (
-    <Link href={`/blog/${post.slug}/`} className="group block">
+    <Link href={routes.post(post.slug)} className="group block">
       <Card className="grid gap-0 py-0 transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-primary/15 group-hover:ring-primary/30 md:grid-cols-2">
         <PostCover
           category={post.category}
