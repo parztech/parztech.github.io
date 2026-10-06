@@ -4,7 +4,7 @@ import { Noto_Sans_Armenian, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { siteConfig } from "@/config/site";
+import { siteConfig, siteTitle } from "@/config/site";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteConfig.name} | ${siteConfig.tagline}`,
+    default: siteTitle,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,

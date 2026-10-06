@@ -3,9 +3,9 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { cache } from "react";
 
-import { siteConfig } from "@/config/site";
 import { db } from "@/db";
 import { posts, type PostRow } from "@/db/schema";
+import { normalizeCategorySlug } from "@/features/blog/config/categories";
 import { renderMarkdown, type Heading } from "@/features/blog/lib/markdown";
 import { formatDate } from "@/lib/format";
 import { getReadingMinutes } from "@/lib/reading-time";
@@ -21,7 +21,6 @@ export type PostMeta = {
   updatedAt: string;
   category: string;
   tags: string[];
-  author: string;
   featured: boolean;
   readingMinutes: number;
 };
@@ -38,9 +37,8 @@ function toMeta(row: PostRow): PostMeta {
     date,
     dateLabel: formatDate(date),
     updatedAt: row.updatedAt.toISOString(),
-    category: row.category,
+    category: normalizeCategorySlug(row.category),
     tags: row.tags,
-    author: siteConfig.author,
     featured: row.featured,
     readingMinutes: getReadingMinutes(row.content),
   };

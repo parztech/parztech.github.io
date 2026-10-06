@@ -4,8 +4,8 @@ import { X } from "lucide-react";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { MAX_TAGS } from "@/features/admin/constants";
 
-import { MAX_TAGS } from "./constants";
 import type { TagsInputProps } from "./types";
 
 export default function TagsInput({ id, value, onChange }: TagsInputProps) {

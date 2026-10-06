@@ -5,6 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import type { EditorPost } from "@/features/admin/types";
+import { normalizeCategorySlug } from "@/features/blog/config/categories";
 
 // Callers must run requireAdmin() first: these include drafts
 
@@ -30,5 +31,8 @@ export async function getPostForEditing(
     .from(posts)
     .where(eq(posts.id, id))
     .limit(1);
-  return post ?? null;
+  // A removed topic would fail validation on save, so offer the default instead
+  return post
+    ? { ...post, category: normalizeCategorySlug(post.category) }
+    : null;
 }

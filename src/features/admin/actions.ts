@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { posts, postStatuses, reactions, type PostStatus } from "@/db/schema";
+import { MAX_TAGS } from "@/features/admin/constants";
 import { SLUG_PATTERN } from "@/features/admin/lib/slug";
 import { requireAdmin } from "@/features/auth/require-admin";
 import { categories } from "@/features/blog/config/categories";
@@ -25,7 +26,7 @@ const postInput = z.object({
   description: z.string().trim().min(1, "Նկարագրությունը պարտադիր է"),
   content: z.string().min(1, "Բովանդակությունը պարտադիր է"),
   category: z.enum(categories.map((c) => c.slug) as [string, ...string[]]),
-  tags: z.array(z.string().trim().min(1)).max(10),
+  tags: z.array(z.string().trim().min(1)).max(MAX_TAGS),
   featured: z.boolean(),
   status: z.enum(postStatuses),
 });
@@ -35,11 +36,10 @@ export type PostInput = z.infer<typeof postInput>;
 export type SaveResult =
   { ok: true; id: string; status: PostStatus } | { ok: false; error: string };
 
-// Public pages are prerendered; refresh them all after any change (small blog)
+// Public pages, sitemap and RSS are prerendered; refreshing the root layout
+// invalidates all of them (exact-path calls for the .xml routes have no effect)
 function refreshSite() {
   revalidatePath(routes.home, "layout");
-  revalidatePath("/sitemap.xml");
-  revalidatePath(routes.rss);
 }
 
 /** The DB unique index is the source of truth, which also covers concurrent saves */

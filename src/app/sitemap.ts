@@ -4,6 +4,10 @@ import { getPublishedPosts } from "@/features/blog/lib/queries";
 import { absoluteUrl } from "@/lib/site-url";
 import { routes } from "@/lib/routes";
 
+// Publishing also refreshes it (see admin actions); this is a fallback, since
+// Vercel was observed serving a build-time sitemap after on-demand revalidation
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPublishedPosts();
   const latest = posts[0]?.updatedAt ?? new Date().toISOString();

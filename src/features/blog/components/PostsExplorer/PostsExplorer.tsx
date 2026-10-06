@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { PostCard } from "@/features/blog/components/PostCard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { categories } from "@/features/blog/config/categories";
+import { categories, isCategorySlug } from "@/features/blog/config/categories";
 import { routes } from "@/lib/routes";
 
 import { ALL_CATEGORIES } from "./constants";
@@ -18,10 +18,7 @@ export default function PostsExplorer({ posts }: PostsExplorerProps) {
   const searchParams = useSearchParams();
   // The URL is the source of truth, so footer/home topic links work on this page too
   const requested = searchParams.get("category");
-  const category =
-    requested && categories.some((c) => c.slug === requested)
-      ? requested
-      : ALL_CATEGORIES;
+  const category = isCategorySlug(requested) ? requested : ALL_CATEGORIES;
   const [query, setQuery] = useState("");
 
   function selectCategory(slug: string) {

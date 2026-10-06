@@ -11,6 +11,7 @@ import { PostMetaLine } from "@/features/blog/components/PostMetaLine";
 import { ReadingProgress } from "@/features/blog/components/ReadingProgress";
 import { TableOfContents } from "@/features/blog/components/TableOfContents";
 import { SectionHeading } from "@/components/SectionHeading";
+import { authorInitials, siteConfig } from "@/config/site";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -90,11 +91,11 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
             <div className="flex items-center gap-3">
               <Avatar size="lg">
                 <AvatarFallback className="bg-linear-to-br from-brand-violet to-brand-pink font-bold text-white">
-                  Պ
+                  {authorInitials}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-semibold">{post.author}</p>
+                <p className="text-sm font-semibold">{siteConfig.author}</p>
                 <PostMetaLine
                   date={post.date}
                   dateLabel={post.dateLabel}

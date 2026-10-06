@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { categories } from "@/features/blog/config/categories";
-import { siteConfig } from "@/config/site";
+import { siteConfig, siteTitle } from "@/config/site";
 import { JsonLd } from "@/features/seo/components/JsonLd";
 import { pageMetadata } from "@/features/seo/lib/metadata";
 import { websiteSchema } from "@/features/seo/lib/schema";
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = pageMetadata({
-  title: `${siteConfig.name} | ${siteConfig.tagline}`,
+  title: siteTitle,
   description: siteConfig.description,
   path: routes.home,
   absoluteTitle: true,
@@ -61,7 +61,7 @@ export default async function Home() {
           )}
 
           <h1 className="text-4xl leading-[1.15] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Տեխնոլոգիաներ և արհեստական բանականություն՝{" "}
+            Տեխնոլոգիաներ և ՍԻ՝{" "}
             <span className="text-gradient">պարզ լեզվով</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground">
@@ -86,7 +86,7 @@ export default async function Home() {
                 "h-11 rounded-full bg-background/60 px-6 backdrop-blur",
               )}
             >
-              Մեր մասին
+              Իմ մասին
             </Link>
           </div>
 
@@ -121,10 +121,10 @@ export default async function Home() {
         <section>
           <SectionHeading
             eyebrow="Թեմաներ"
-            title="Ինչի մասին ենք գրում"
+            title="Ինչի մասին եմ գրում"
             description="Ընտրիր քեզ հետաքրքրող ոլորտը և սկսիր այնտեղից։"
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {categories.map((c) => {
               const count = posts.filter((p) => p.category === c.slug).length;
               return (

@@ -55,11 +55,7 @@ export function blogPostingSchema(post: PostMeta) {
         inLanguage: "hy",
         articleSection: category.name,
         keywords: post.tags.join(", "),
-        author: {
-          "@type": "Organization",
-          "@id": ORGANIZATION_ID,
-          name: siteConfig.name,
-        },
+        author: { "@type": "Person", name: siteConfig.author },
         publisher: { "@id": ORGANIZATION_ID },
         isPartOf: { "@id": WEBSITE_ID },
       },

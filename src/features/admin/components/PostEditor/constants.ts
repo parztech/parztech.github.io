@@ -1,12 +1,15 @@
 import type { EditorPost } from "@/features/admin/types";
-import { categories } from "@/features/blog/config/categories";
+import {
+  categories,
+  DEFAULT_CATEGORY,
+} from "@/features/blog/config/categories";
 
 export const EMPTY_POST: EditorPost = {
   title: "",
   slug: "",
   description: "",
   content: "",
-  category: categories[0].slug,
+  category: DEFAULT_CATEGORY.slug,
   tags: [],
   featured: false,
   status: "draft",
