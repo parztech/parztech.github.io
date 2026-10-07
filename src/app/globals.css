@@ -159,6 +159,11 @@
   ::selection {
     background: color-mix(in oklch, var(--brand-violet) 25%, transparent);
   }
+  /* Tailwind v4 dropped the pointer cursor on buttons; restore it site-wide */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @utility text-gradient {

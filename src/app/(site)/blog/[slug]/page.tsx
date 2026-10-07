@@ -22,9 +22,12 @@ import {
 import { getCategory } from "@/features/blog/config/categories";
 import { PostReactions } from "@/features/reactions/components/PostReactions";
 import { JsonLd } from "@/features/seo/components/JsonLd";
+import { ShareButtons } from "@/features/share/components/ShareButtons";
+import { ShareMenu } from "@/features/share/components/ShareMenu";
 import { pageMetadata } from "@/features/seo/lib/metadata";
 import { blogPostingSchema } from "@/features/seo/lib/schema";
 import { routes } from "@/lib/routes";
+import { absoluteUrl } from "@/lib/site-url";
 
 // Prerender existing posts at build; new ones render on first visit and are cached
 export async function generateStaticParams() {
@@ -57,6 +60,12 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
   const post = await getPublishedPost(slug);
   if (!post) notFound();
 
+  const share = {
+    url: absoluteUrl(routes.post(post.slug)),
+    title: post.title,
+    description: post.description,
+  };
+
   const others = (await getPublishedPosts()).filter(
     (p) => p.slug !== post.slug,
   );
@@ -87,7 +96,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
             {post.description}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Avatar size="lg">
                 <AvatarFallback className="bg-linear-to-br from-brand-violet to-brand-pink font-bold text-white">
@@ -103,6 +112,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
                 />
               </div>
             </div>
+            <ShareMenu {...share} />
           </div>
         </div>
       </header>
@@ -119,6 +129,7 @@ export default async function PostPage(props: PageProps<"/blog/[slug]">) {
         <div className="min-w-0">
           <PostBody html={post.html} />
           <PostReactions postId={post.id} />
+          <ShareButtons {...share} />
 
           {post.tags.length > 0 && (
             <div className="mt-12 flex flex-wrap items-center gap-2">

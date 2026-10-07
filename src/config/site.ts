@@ -22,5 +22,3 @@ export const authorInitials = siteConfig.author
   .split(" ")
   .map((part) => part[0])
   .join("");
-
-export type SiteConfig = typeof siteConfig;
